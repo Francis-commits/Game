@@ -4,583 +4,824 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Logic Quest — Finalized Start & Focused Play</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
 <style>
-  :root{
-    --bg:#071033; --panel:#0f1440; --muted:#b6b8d6; --accent:#ff3d84; --accent2:#6c58ff; --gold:#ffd166;
-    --ok:#36d399; --bad:#ff6b6b; --border:#2e335a;
-    --btn-height:48px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
-  body{background:linear-gradient(180deg,#05061a 0%,#071033 100%);color:#fff;overflow:hidden}
+/* --- CUSTOM CSS (KEPT FOR THEME/COLORS/ANIMATIONS) --- */
+:root{
+  --bg:#071033; --panel:#0f1440; --muted:#b6b8d6; --accent:#ff3d84; --accent2:#6c58ff; --gold:#ffd166;
+  --ok:#36d399; --bad:#ff4747;
+  --border:#2e335a;
+  --btn-height:54px; /* Standard button height */
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+body{background:linear-gradient(180deg,#05061a 0%,#071033 100%);color:#fff;overflow:hidden}
 
-  header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(8,12,36,.6);border-bottom:1px solid rgba(255,255,255,.03);z-index:20}
-  header h1{margin:0;font-size:18px}
-  .top-actions{display:flex;gap:10px;align-items:center}
+/* Custom styles replacing Bootstrap defaults */
+header{
+  height:60px; 
+  background:rgba(8,12,36,.8);
+  border-bottom:1px solid rgba(255,255,255,.05);
+  box-shadow:0 2px 8px rgba(0,0,0,.4); 
+  z-index:20;
+}
+header h1{margin:0;font-size:20px}
+.muted{color:var(--muted);font-size:14px} 
 
-  main{height:calc(100% - 56px);display:flex;align-items:center;justify-content:center;padding:18px}
+main{
+  height:calc(100% - 60px); 
+  padding:1rem 0;
+}
 
-  /* Game card */
-  .game-card{width:100%;max-width:1100px;height:100%;background:linear-gradient(180deg,#071033,#06102a);border-radius:12px;padding:18px;border:1px solid var(--border);box-shadow:0 18px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;gap:8px;overflow:hidden;position:relative}
-  .muted{color:var(--muted);font-size:13px}
+/* 🚩 SIZE ADJUSTMENT 1: Reduce default card padding slightly */
+.game-card{
+  background:linear-gradient(180deg,#071033,#06102a);
+  border-radius:16px; 
+  padding:1.25rem; /* Reduced from 1.5rem */
+  border:1px solid var(--border);
+  box-shadow:0 18px 60px rgba(0,0,0,.6);
+  overflow:hidden;position:relative;
+}
 
-  /* Active player card */
-  .player-card{width:520px;max-width:92vw;padding:18px;border-radius:14px;background:linear-gradient(180deg,#081236,#07102a);border:1px solid rgba(255,255,255,.03);display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 10px 40px rgba(0,0,0,.6)}
-  .player-name{font-size:20px;font-weight:800}
-  .buffs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .buff-pill{padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);cursor:pointer;user-select:none}
-  .buff-pill.used{opacity:.32;text-decoration:line-through;cursor:default}
-  .gems{display:flex;gap:8px;margin-top:6px}
-  .gem{width:26px;height:26px;border-radius:50%;background:#2b2e62;border:2px solid var(--border);transition:transform .18s,box-shadow .18s}
-  .gem.fill{background:radial-gradient(circle,var(--accent2),var(--gold));box-shadow:0 0 14px rgba(108,88,255,.28);transform:scale(1.16)}
+/* Player Card */
+.player-card{
+  padding:0.75rem; /* Reduced from 1rem */
+  border-radius:18px; 
+  background:linear-gradient(180deg,#081236,#07102a);
+  border:1px solid rgba(255,255,255,.06); 
+  box-shadow:0 10px 40px rgba(0,0,0,.6)
+}
+.player-name{font-size:22px;font-weight:800}
+.buff-pill{
+  padding:8px 14px; border-radius:14px; background:rgba(255,255,255,.05); 
+  border:1px solid rgba(255,255,255,.08); cursor:pointer;user-select:none; transition:background .15s
+}
+.buff-pill:not(.used):hover{background:rgba(255,255,255,.1)} 
+.buff-pill.used{opacity:.4;text-decoration:line-through;cursor:default}
+.gem{width:28px;height:28px;border-radius:50%;background:#2b2e62;border:2px solid var(--border);transition:transform .18s,box-shadow .18s}
+.gem.fill{background:radial-gradient(circle,var(--accent2),var(--gold));box-shadow:0 0 16px rgba(108,88,255,.36);transform:scale(1.18)}
 
-  /* Big statement */
-  #expr{font-size:clamp(28px, 6vw, 64px);color:var(--gold);text-align:center;margin:18px 0;font-weight:900;line-height:1;word-break:break-word;max-width:96%}
-  #assign{color:var(--muted);font-size:14px;text-align:center}
+/* Big statement and Timer */
+/* 🚩 SIZE ADJUSTMENT 2: Tighter clamp range for font size */
+#expr{font-size:clamp(24px, 6vw, 72px);color:var(--gold);text-align:center;margin:1rem 0;font-weight:900;line-height:1;word-break:break-word;max-width:96%;transition:transform .12s}
+#assign{color:var(--muted);font-size:16px;text-align:center}
+.timer-circle{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent2) 0deg, rgba(255,255,255,.04) 0deg);position:relative}
+.timer-inner{width:56px;height:56px;border-radius:50%;background:#07102a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}
+.timer-seconds{font-size:16px;color:var(--muted)}
 
-  /* timer */
-  .timer-row{display:flex;gap:14px;align-items:center;margin-top:6px}
-  .timer-circle{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--accent2) 0deg, rgba(255,255,255,.04) 0deg);position:relative}
-  .timer-inner{width:60px;height:60px;border-radius:50%;background:#07102a;display:flex;align-items:center;justify-content:center;font-weight:800}
-  .timer-seconds{font-size:14px;color:var(--muted)}
+/* Action Buttons */
+.btn-true{background:var(--ok);color:#04120c;border:none;border-radius:16px;font-size:18px;font-weight:700;cursor:pointer;min-width:160px;height:var(--btn-height);transition:transform .15s}
+.btn-true:active{transform:translateY(2px)}
+.btn-false{background:var(--bad);color:#fff;border:none;border-radius:16px;font-size:18px;font-weight:700;cursor:pointer;min-width:160px;height:var(--btn-height);transition:transform .15s}
+.btn-false:active{transform:translateY(2px)}
+.btn-small{
+  padding:0.75rem 1rem; border-radius:16px; background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1); cursor:pointer; height:var(--btn-height); font-size:16px;
+  transition:background .15s, transform .15s
+}
+.btn-small:hover{background:rgba(255,255,255,.1)}
+.btn-small:active{transform:translateY(2px)}
 
-  /* actions */
-  .actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-  .btn-true{background:var(--ok);color:#04120c;border:none;padding:14px 24px;border-radius:14px;font-size:18px;cursor:pointer;min-width:150px;height:var(--btn-height)}
-  .btn-false{background:var(--bad);color:#fff;border:none;padding:14px 24px;border-radius:14px;font-size:18px;cursor:pointer;min-width:150px;height:var(--btn-height)}
-  .btn-small{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);cursor:pointer;height:var(--btn-height)}
+.dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.08);cursor:pointer;transition:background .15s,box-shadow .15s}
+.dot.active{background:var(--gold);box-shadow:0 0 10px rgba(255,209,102,.3)}
 
-  .indicators{display:flex;gap:8px;margin-top:12px}
-  .dot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.06);cursor:pointer}
-  .dot.active{background:var(--gold);box-shadow:0 0 8px rgba(255,209,102,.18)}
+#result{min-height:40px;margin-top:1rem;text-align:center;font-weight:800;font-size:18px}
+.log{
+  max-height:150px; overflow:auto; margin-top:0.75rem; padding:0.75rem; 
+  border-radius:10px; background:rgba(0,0,0,.12); color:var(--muted);width:100%
+}
 
-  #result{min-height:40px;margin-top:12px;text-align:center;font-weight:800}
-  .log{max-height:120px;overflow:auto;margin-top:8px;padding:8px;border-radius:8px;background:rgba(0,0,0,.06);color:var(--muted);width:100%}
+/* Welcome Overlay */
+.overlay {
+  position:fixed;left:0;right:0;top:0;bottom:0;z-index:99999;
+  background:linear-gradient(180deg, rgba(0,0,0,.8), rgba(0,0,0,.9));
+  padding:20px;
+}
+.overlay.hidden{display:none!important;pointer-events:none!important}
+.welcome {
+  border-radius:20px; padding:1.75rem; 
+  background:linear-gradient(180deg,#071033,#06102a);
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:0 30px 120px rgba(0,0,0,.7);
+}
+.brand-icon{font-size:40px;color:var(--gold);}
+.brand-title{font-size:30px;color:var(--gold);font-weight:900}
+.brand-sub{color:var(--muted);font-size:16px}
+input[type=number], input[type=text], select{
+  padding:10px; border-radius:10px; border:1px solid var(--border);
+  background:rgba(255,255,255,.02); color:#fff; font-size:16px
+}
+.avatar{
+  width:60px;height:60px; border-radius:12px; background:rgba(255,255,255,.04);
+  display:flex;align-items:center;justify-content:center; font-size:32px;
+  cursor:pointer; border:2px solid transparent; transition:border-color .15s,box-shadow .15s
+}
+.avatar.selected{border-color:var(--gold);box-shadow:0 0 12px rgba(255,209,102,.12)}
+.btn-primary{
+  padding:14px 22px; border-radius:12px; border:none; background:var(--accent2);
+  color:#fff; font-weight:800; cursor:pointer; height:var(--btn-height); font-size:18px;
+  transition:transform .15s
+}
+.btn-primary:active{transform:translateY(2px)}
+.btn-secondary{
+  padding:12px 16px; border-radius:12px; background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1); color:var(--muted); cursor:pointer;
+  height:var(--btn-height); font-size:16px; transition:transform .15s
+}
+.btn-secondary:active{transform:translateY(2px)}
+.diamond{font-size:50px;display:inline-block;transform-origin:center;animation:diamond-spin 2.2s linear infinite}
+.sorcerer{font-size:54px;display:inline-block;animation:sorcerer-bob 2.4s ease-in-out infinite}
+@keyframes diamond-spin{0%{transform:rotate(0deg) translateY(0)}50%{transform:rotate(180deg) translateY(-6px)}100%{transform:rotate(360deg) translateY(0)}}
+@keyframes sorcerer-bob{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.04)}100%{transform:translateY(0) scale(1)}}
 
-  /* Full-screen welcome overlay (covers entire viewport) */
-  .overlay {
-    position:fixed;left:0;right:0;top:0;bottom:0;z-index:99999;
-    display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.84));
-    padding:20px;
-  }
-  .overlay.hidden{display:none!important;pointer-events:none!important}
-  .welcome {
-    width:100%;max-width:980px;border-radius:14px;padding:22px;background:linear-gradient(180deg,#071033,#06102a);border:1px solid rgba(255,255,255,.03);display:flex;gap:18px;box-shadow:0 30px 120px rgba(0,0,0,.7);align-items:center;
-  }
-  .welcome-left{width:36%;min-width:220px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
-  .brand-icon{font-size:36px;color:var(--gold);display:flex;gap:12px;align-items:center}
-  .brand-title{font-size:26px;color:var(--gold);font-weight:900}
-  .brand-sub{color:var(--muted);font-size:14px}
+.back-btn{
+  padding:10px 14px; border-radius:12px; background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1); color:var(--muted); cursor:pointer; height:var(--btn-height)
+}
+.victory {
+  position:fixed;left:50%;top:10%; transform:translateX(-50%); padding:14px 20px;
+  border-radius:16px; background:linear-gradient(90deg,#ffd166,#ff3d84);
+  color:#042024;font-weight:900;z-index:999999; font-size:18px;
+}
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:999998;overflow:hidden}
 
-  .welcome-right{flex:1;display:flex;flex-direction:column;gap:12px}
-  .setup-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  input[type=number], input[type=text], select{padding:8px;border-radius:8px;border:1px solid var(--border);background:transparent;color:#fff}
-
-  .avatars{display:flex;gap:8px;flex-wrap:wrap}
-  .avatar{width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,.02);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px solid transparent}
-  .avatar.selected{border-color:var(--gold);box-shadow:0 8px 20px rgba(255,209,102,.06)}
-
-  .players-setup{display:flex;flex-direction:column;gap:8px}
-  .player-setup{display:flex;gap:8px;align-items:center}
-
-  .start-row{display:flex;gap:12px;justify-content:flex-end;margin-top:6px}
-  .btn-primary{padding:12px 18px;border-radius:10px;border:none;background:var(--accent2);color:#fff;font-weight:800;cursor:pointer;height:var(--btn-height)}
-  .btn-secondary{padding:10px 14px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,.04);color:var(--muted);cursor:pointer;height:var(--btn-height)}
-
-  .welcome-visuals{display:flex;gap:14px;align-items:center}
-  .diamond{font-size:44px;display:inline-block;transform-origin:center;animation:diamond-spin 2.2s linear infinite}
-  .sorcerer{font-size:48px;display:inline-block;animation:sorcerer-bob 2.4s ease-in-out infinite}
-  @keyframes diamond-spin{0%{transform:rotate(0deg) translateY(0)}50%{transform:rotate(180deg) translateY(-6px)}100%{transform:rotate(360deg) translateY(0)}}
-  @keyframes sorcerer-bob{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.04)}100%{transform:translateY(0) scale(1)}}
-
-  /* Back button (responsive) */
-  .back-btn{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,.06);color:var(--muted);cursor:pointer;height:var(--btn-height)}
-
-  .victory {position:fixed;left:50%;top:8%;transform:translateX(-50%);padding:12px 18px;border-radius:14px;background:linear-gradient(90deg,#ffd166,#ff3d84);color:#042024;font-weight:900;z-index:999999;display:flex;gap:12px;align-items:center}
-
-  .confetti-container{position:fixed;inset:0;pointer-events:none;z-index:999998;overflow:hidden}
-  @media (max-width:880px){ .welcome{flex-direction:column} .welcome-left{align-items:center;text-align:center} .start-row{justify-content:center} .player-card{width:92%} .avatar{width:48px;height:48px;font-size:22px} }
+/* Custom layout adjustments for Bootstrap utilities */
+@media (max-width: 992px) {
+  .welcome .row { flex-direction: column; }
+  .welcome-left { text-align: center; align-items: center !important; }
+}
+@media (max-width: 576px) {
+  /* 🚩 SIZE ADJUSTMENT 3: Optimize button stacking on mobile */
+  /* Allow true/false buttons to stack neatly on small screens */
+  .actions .btn-true, .actions .btn-false { min-width: 48%; }
+  /* Ensure smaller buttons take up available width, potentially stacking below the main two */
+  .actions .btn-small { min-width: 30%; height: 44px; font-size: 14px; }
+  .actions { gap: 8px !important; } /* Tighter gap on small screens */
+  :root{ --btn-height: 48px; } /* Slightly reduced height for better space */
+}
 </style>
 </head>
 <body>
-<header>
+
+<header class="d-flex align-items-center justify-content-between px-4">
   <h1>Logic Quest</h1>
-  <div class="top-actions">
+  <div class="top-actions d-flex align-items-center gap-3">
     <button id="backToWelcome" class="back-btn" type="button" title="Back to welcome" aria-label="Back to welcome">⤺ Back</button>
-    <div style="color:var(--muted);font-size:13px">Hotseat · Shortcuts: T/F/H/S · M mute</div>
+    <span class="d-none d-md-inline" style="color:var(--muted);font-size:13px">Hotseat · Shortcuts: T/F/H/S · M mute</span>
   </div>
 </header>
 
-<main>
-  <div class="game-card" id="gameCard" aria-live="polite" aria-hidden="true">
-    <div class="player-card" id="playerCard" aria-live="polite">
+<main class="d-flex align-items-center justify-content-center">
+  <div class="game-card d-flex flex-column align-items-center" id="gameCard" aria-live="polite" aria-hidden="true" style="max-width:1000px; width:96%;">
+    
+    <div class="player-card col-12 col-md-10 col-lg-8 mb-3 p-3 d-flex flex-column align-items-center mx-auto" id="playerCard" aria-live="polite">
       <div class="player-name" id="playerName">Player</div>
-      <div class="buffs" id="buffsArea"></div>
-      <div class="gems" id="gemsArea"></div>
-      <div id="scoreArea" class="muted">Score: 0</div>
+      <div class="buffs d-flex flex-wrap justify-content-center gap-2 mt-2" id="buffsArea"></div>
+      <div class="gems d-flex gap-2 mt-3" id="gemsArea"></div>
+      <div id="scoreArea" class="muted mt-2">Score: 0</div>
     </div>
 
     <div id="expr">Press Start</div>
     <div id="assign" class="muted"></div>
 
-    <div class="timer-row">
+    <div class="timer-row d-flex gap-3 align-items-center mt-3">
       <div class="timer-circle" id="timerCircle"><div class="timer-inner" id="timerInner">20</div></div>
       <div class="timer-seconds muted" id="timerLabel">seconds</div>
     </div>
 
-    <div class="actions">
-      <button id="trueBtn" class="btn-true">True (T)</button>
-      <button id="falseBtn" class="btn-false">False (F)</button>
+    <div class="actions d-flex flex-wrap justify-content-center gap-3 mt-4 w-100" style="max-width: 600px;">
+      <button id="trueBtn" class="btn-true flex-grow-1">True (T)</button>
+      <button id="falseBtn" class="btn-false flex-grow-1">False (F)</button>
       <button id="hintBtn" class="btn-small">Hint (H)</button>
       <button id="skipBtn" class="btn-small">Skip (S)</button>
       <button id="explainBtn" class="btn-small">Explain</button>
     </div>
 
     <div id="result"></div>
-    <div class="indicators" id="indicators"></div>
-    <div class="log" id="log" tabindex="0"></div>
+    <div class="indicators d-flex gap-2 mt-3" id="indicators"></div>
+    
+    <div class="log w-100 mt-3 mx-auto" id="log" tabindex="0" style="max-width: 600px;"></div>
   </div>
 </main>
 
-<!-- Victory banner -->
 <div id="victoryBanner" class="victory" style="display:none"><div id="victoryText"></div><button id="closeVictory" class="btn-secondary">Close</button></div>
 
-<!-- Confetti container -->
 <div class="confetti-container" id="confetti"></div>
 
-<!-- Fullscreen welcome overlay (covers all) -->
-<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Welcome to Logic Quest">
-  <div class="welcome" id="welcomePanel">
-    <div class="welcome-left">
-      <div class="brand-icon">
-        <span class="diamond" aria-hidden="true">💎</span>
-        <span class="sorcerer" aria-hidden="true">🧙‍♂️</span>
-      </div>
-      <div class="brand-title">Welcome to Logic Quest</div>
-      <div class="brand-sub">A tabletop-style hotseat logic game. Choose players, avatars and two one-use buffs each. The overlay covers the entire screen — Start is always reachable.</div>
-      <div class="muted">Controls: T (True), F (False), H (Hint), S (Skip), M (Mute)</div>
-    </div>
+<div class="overlay d-flex align-items-center justify-content-center" id="overlay" role="dialog" aria-modal="true" aria-label="Welcome to Logic Quest">
+  <div class="welcome col-12 col-lg-10 col-xl-9 shadow" id="welcomePanel">
+    <div class="row g-4">
+        <div class="welcome-left col-12 col-lg-4 d-flex flex-column gap-3 align-items-lg-start">
+            <div class="brand-icon d-flex gap-3 align-items-center">
+                <span class="diamond" aria-hidden="true">💎</span>
+                <span class="sorcerer" aria-hidden="true">🧙‍♂️</span>
+            </div>
+            <div class="brand-title">Welcome to Logic Quest</div>
+            <div class="brand-sub">A tabletop-style hotseat logic game. Choose players, avatars and two one-use buffs each. The overlay covers the entire screen — Start is always reachable.</div>
+            <div class="muted mt-2">Controls: T (True), F (False), H (Hint), S (Skip), M (Mute)</div>
+        </div>
 
-    <div class="welcome-right">
-      <div class="setup-row">
-        <label>Players</label>
-        <input id="playerCount" type="number" min="1" max="4" value="2" aria-label="Number of players">
-        <label>Turn (sec)</label>
-        <input id="turnTime" type="number" min="5" max="60" value="20" aria-label="Turn time">
-        <label>Target Gems</label>
-        <input id="targetGems" type="number" min="1" max="9" value="5" aria-label="Target gems to win">
-      </div>
+        <div class="welcome-right col-12 col-lg-8 d-flex flex-column gap-3">
+            <div class="setup-row d-flex gap-3 align-items-center flex-wrap">
+                <label>Players</label>
+                <input id="playerCount" type="number" min="1" max="4" value="2" aria-label="Number of players" style="width: 60px;">
+                <label>Turn (sec)</label>
+                <input id="turnTime" type="number" min="5" max="60" value="20" aria-label="Turn time" style="width: 70px;">
+                <label>Target Gems</label>
+                <input id="targetGems" type="number" min="1" max="9" value="5" aria-label="Target gems to win" style="width: 60px;">
+            </div>
 
-      <div style="margin-top:8px">
-        <label class="muted">Pick an avatar (applies as default for players)</label>
-        <div class="avatars" id="avatarsRow" aria-hidden="false"></div>
-      </div>
+            <div class="mt-2">
+                <label class="muted">Pick an avatar (applies as default for players)</label>
+                <div class="avatars d-flex gap-2 flex-wrap mt-2" id="avatarsRow" aria-hidden="false"></div>
+            </div>
 
-      <div style="margin-top:8px">
-        <label class="muted">Player names & two buffs each</label>
-        <div class="players-setup" id="playersSetup"></div>
-      </div>
+            <div class="mt-2">
+                <label class="muted">Player names & two buffs each</label>
+                <div class="players-setup d-flex flex-column gap-2 mt-2" id="playersSetup"></div>
+            </div>
 
-      <div class="start-row">
-        <button id="startBtn" class="btn-primary" type="button">Start Game</button>
-        <button id="demoBtn" class="btn-secondary" type="button">Quick 1v1</button>
-      </div>
+            <div class="start-row d-flex gap-3 justify-content-end mt-2">
+                <button id="startBtn" class="btn-primary" type="button">Start Game</button>
+                <button id="demoBtn" class="btn-secondary" type="button">Quick 1v1</button>
+            </div>
+        </div>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
 <script>
-/* Back button + animated welcome visuals + responsive buttons
-   - Back button (header) returns you to the welcome overlay and pauses/stops the game timer.
-   - Welcome shows animated diamond and sorcerer.
-   - All buttons sized for touch; start overlay covers the screen until Start/Demo is pressed.
-*/
+/*
+ * Logic Quest Game Logic
+ */
 
-/* ---- Helpers ---- */
-const $ = id => document.getElementById(id);
-const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
-const rand = n => Math.floor(Math.random()*n);
+/* --- Configuration Data --- */
+const CONFIG = {
+    AVATARS: ['🐉','🦊','🦁','🦄','🦉','🐙','🧠','🛡️'],
+    BUFFS: [
+        {name:'🛡️ Shield', key:'shield', desc:'No penalty for your next wrong answer.'},
+        {name:'🔄 Negation', key:'negate', desc:'Flip your next chosen answer.'},
+        {name:'⚡ Dash', key:'dash', desc:'Skip your turn immediately.'},
+        {name:'💎 Double', key:'double', desc:'Next correct grants +2 gems.'}
+    ],
+    DECK: [
+        {expr:'P ∧ Q',vars:['P','Q'],eval:v=>(v.P&&v.Q)},
+        {expr:'P ∨ Q',vars:['P','Q'],eval:v=>(v.P||v.Q)},
+        {expr:'¬P ∧ Q',vars:['P','Q'],eval:v=>(!v.P&&v.Q)},
+        {expr:'P ∧ ¬Q',vars:['P','Q'],eval:v=>(v.P&&!v.Q)},
+        {expr:'¬(P ∧ Q)',vars:['P','Q'],eval:v=>!(v.P&&v.Q)},
+        {expr:'P ⇒ Q',vars:['P','Q'],eval:v=>(!v.P||v.Q)},
+        {expr:'P ⇔ Q',vars:['P','Q'],eval:v=>(v.P===v.Q)},
+        {expr:'P ⊕ Q',vars:['P','Q'],eval:v=>(v.P!==v.Q)},
+        {expr:'(P ∨ Q) ∧ (¬Q)',vars:['P','Q'],eval:v=>(v.P||v.Q)&&!v.Q}
+    ]
+};
 
-/* ---- DOM references ---- */
-const overlay = $('overlay');
-const startBtn = $('startBtn');
-const demoBtn = $('demoBtn');
-const playerCountInput = $('playerCount');
-const turnTimeInput = $('turnTime');
-const targetGemsInput = $('targetGems');
-const avatarsRow = $('avatarsRow');
-const playersSetup = $('playersSetup');
-const welcomePanel = $('welcomePanel');
+/* --- DOM Element References --- */
+const DOM = {
+    $: id => document.getElementById(id),
+    get overlay() { return this.$('overlay'); },
+    get playerCountInput() { return this.$('playerCount'); },
+    get playersSetup() { return this.$('playersSetup'); },
+    get avatarsRow() { return this.$('avatarsRow'); },
+    get gameCard() { return this.$('gameCard'); },
+    get playerNameEl() { return this.$('playerName'); },
+    get buffsArea() { return this.$('buffsArea'); },
+    get gemsArea() { return this.$('gemsArea'); },
+    get scoreArea() { return this.$('scoreArea'); },
+    get exprEl() { return this.$('expr'); },
+    get assignEl() { return this.$('assign'); },
+    get timerCircle() { return this.$('timerCircle'); },
+    get timerInner() { return this.$('timerInner'); },
+    get indicators() { return this.$('indicators'); },
+    get resultEl() { return this.$('result'); },
+    get logEl() { return this.$('log'); },
+    get victoryBanner() { return this.$('victoryBanner'); },
+    get victoryText() { return this.$('victoryText'); },
+    get confettiRoot() { return this.$('confetti'); },
+    get startBtn() { return this.$('startBtn'); },
+    get demoBtn() { return this.$('demoBtn'); },
+    get backToWelcome() { return this.$('backToWelcome'); },
+    get trueBtn() { return this.$('trueBtn'); },
+    get falseBtn() { return this.$('falseBtn'); },
+    get hintBtn() { return this.$('hintBtn'); },
+    get skipBtn() { return this.$('skipBtn'); },
+    get explainBtn() { return this.$('explainBtn'); },
+    get closeVictory() { return this.$('closeVictory'); },
+    get turnTimeInput() { return this.$('turnTime'); },
+    get targetGemsInput() { return this.$('targetGems'); }
+};
 
-const backToWelcome = $('backToWelcome');
-const gameCard = $('gameCard');
-const playerNameEl = $('playerName');
-const buffsArea = $('buffsArea');
-const gemsArea = $('gemsArea');
-const scoreArea = $('scoreArea');
-
-const exprEl = $('expr');
-const assignEl = $('assign');
-
-const timerCircle = $('timerCircle');
-const timerInner = $('timerInner');
-
-const trueBtn = $('trueBtn');
-const falseBtn = $('falseBtn');
-const hintBtn = $('hintBtn');
-const skipBtn = $('skipBtn');
-const explainBtn = $('explainBtn');
-
-const indicators = $('indicators');
-const resultEl = $('result');
-const logEl = $('log');
-
-const confettiRoot = $('confetti');
-const victoryBanner = $('victoryBanner');
-const victoryText = $('victoryText');
-const closeVictory = $('closeVictory');
-
-/* ---- Data ---- */
-const AVATARS = ['🐉','🦊','🦁','🦄','🦉','🐙','🧠','🛡️'];
-const BUFFS = [
-  {name:'🛡️ Shield', key:'shield', desc:'No penalty for your next wrong answer.'},
-  {name:'🔄 Negation', key:'negate', desc:'Flip your next chosen answer.'},
-  {name:'⚡ Dash', key:'dash', desc:'Skip your turn immediately.'},
-  {name:'💎 Double', key:'double', desc:'Next correct grants +2 gems.'}
-];
-const originalDeck = [
-  {expr:'P ∧ Q',vars:['P','Q'],eval:v=>(v.P&&v.Q)},
-  {expr:'P ∨ Q',vars:['P','Q'],eval:v=>(v.P||v.Q)},
-  {expr:'¬P ∧ Q',vars:['P','Q'],eval:v=>(!v.P&&v.Q)},
-  {expr:'P ∧ ¬Q',vars:['P','Q'],eval:v=>(v.P&&!v.Q)},
-  {expr:'¬(P ∧ Q)',vars:['P','Q'],eval:v=>!(v.P&&v.Q)},
-  {expr:'P ⇒ Q',vars:['P','Q'],eval:v=>(!v.P||v.Q)},
-  {expr:'P ⇔ Q',vars:['P','Q'],eval:v=>(v.P===v.Q)},
-  {expr:'P ⊕ Q',vars:['P','Q'],eval:v=>(v.P!==v.Q)},
-  {expr:'(P ∨ Q) ∧ (¬Q)',vars:['P','Q'],eval:v=>(v.P||v.Q)&&!v.Q}
-];
-
-/* --- State --- */
-let players = [];
-let currentPlayer = 0;
-let targetGems = 5;
-let turnSeconds = 20;
-let deck = [];
-let deckIndex = 0;
-let currentChallenge = null;
-let timerRemaining = 0;
-let timerTicker = null;
-let audioCtx = null;
-let muted = localStorage.getItem('logicQuest.muted') === 'true';
-let gameOver = false;
+/* --- Game State --- */
+const STATE = {
+    players: [],
+    currentPlayerIndex: 0,
+    targetGems: 5,
+    turnSeconds: 20,
+    deck: [],
+    deckIndex: 0,
+    currentChallenge: null,
+    timerRemaining: 0,
+    timerTicker: null,
+    audioCtx: null,
+    muted: localStorage.getItem('logicQuest.muted') === 'true',
+    gameOver: false,
+};
 
 /* --- Utilities --- */
-function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function log(msg){ const time=(new Date()).toLocaleTimeString(); logEl.insertAdjacentHTML('afterbegin', `<div style="margin-bottom:6px"><strong style="color:var(--muted)">[${time}]</strong> ${msg}</div>`); }
-function ensureAudio(){ if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-function beep(freq=440,dur=120,vol=0.06){ if (muted) return; try{ ensureAudio(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type='sine'; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(audioCtx.destination); o.start(); setTimeout(()=> o.stop(), dur);}catch(e){} }
-
-/* --- Setup UI --- */
-function buildAvatars(){
-  avatarsRow.innerHTML = '';
-  AVATARS.forEach(av => {
-    const b = document.createElement('button');
-    b.type='button'; b.className='avatar'; b.textContent = av;
-    b.addEventListener('click', () => { avatarsRow.querySelectorAll('.avatar').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); });
-    avatarsRow.appendChild(b);
-  });
-}
-function buildPlayersSetup(){
-  playersSetup.innerHTML = '';
-  const count = clamp(Number(playerCountInput.value || 2),1,4);
-  for (let i=0;i<count;i++){
-    const row = document.createElement('div'); row.className='player-setup'; row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center';
-    const name = document.createElement('input'); name.type='text'; name.value=`Player ${i+1}`; name.placeholder=`Player ${i+1}`; name.style.flex='1';
-    const buff1 = document.createElement('select'); const buff2 = document.createElement('select');
-    BUFFS.forEach(b => { const o1=document.createElement('option'); o1.value=b.key; o1.textContent=b.name; buff1.appendChild(o1); const o2=document.createElement('option'); o2.value=b.key; o2.textContent=b.name; buff2.appendChild(o2); });
-    buff1.style.width='120px'; buff2.style.width='120px';
-    row.appendChild(name); row.appendChild(buff1); row.appendChild(buff2);
-    playersSetup.appendChild(row);
-  }
-}
-
-/* --- Deck mechanics --- */
-function initDeck(){ deck = shuffle([...originalDeck]); deckIndex = 0; }
-function drawQuestion(){ if (deckIndex >= deck.length) initDeck(); const q = deck[deckIndex++]; const assign = {}; q.vars.forEach(k=> assign[k] = Math.random() < 0.5); currentChallenge = {...q, assign}; }
-
-/* --- Timer --- */
-function startTimer(){ stopTimer(); timerRemaining = turnSeconds; updateTimer(); timerTicker = setInterval(()=>{ timerRemaining--; updateTimer(); if (timerRemaining <= 0){ stopTimer(); log(`${players[currentPlayer].name} timed out.`); setResult('Time up — auto-skip!'); nextTurn(true); } }, 1000); }
-function stopTimer(){ if (timerTicker){ clearInterval(timerTicker); timerTicker = null; } }
-function updateTimer(){ timerInner.textContent = timerRemaining; const pct = (timerRemaining / turnSeconds) * 360; timerCircle.style.background = `conic-gradient(var(--accent2) ${pct}deg, rgba(255,255,255,.04) ${pct}deg)`; }
-
-/* --- Render active player --- */
-function renderActive(){
-  const p = players[currentPlayer];
-  playerNameEl.textContent = `${p.avatar || ''} ${p.name}`;
-  buffsArea.innerHTML = '';
-  p.buffKeys.forEach((bk, idx) => {
-    const pill = document.createElement('div');
-    pill.className = 'buff-pill' + (p.buffUsed[idx] ? ' used' : '');
-    pill.textContent = BUFFS.find(b=>b.key===bk).name + (p.buffUsed[idx] ? ' (used)' : '');
-    pill.title = BUFFS.find(b=>b.key===bk).desc;
-    pill.addEventListener('click', () => { if (gameOver) return; if (!p.buffUsed[idx] && players[currentPlayer] === p) activateBuff(p, idx); });
-    buffsArea.appendChild(pill);
-  });
-  gemsArea.innerHTML = '';
-  for (let i=0;i<targetGems;i++){
-    const g = document.createElement('div'); g.className = 'gem' + (i < p.gems ? ' fill' : ''); gemsArea.appendChild(g);
-  }
-  scoreArea.textContent = `Score: ${p.score}`;
-  renderIndicators();
-}
-
-/* --- Indicators --- */
-function renderIndicators(){
-  indicators.innerHTML = '';
-  players.forEach((pl, i) => {
-    const dot = document.createElement('div'); dot.className = 'dot' + (i===currentPlayer ? ' active' : ''); dot.title = pl.name;
-    dot.addEventListener('click', ()=> { currentPlayer = i; renderActive(); if (currentChallenge) updateChallengeVis(); });
-    indicators.appendChild(dot);
-  });
-}
-
-/* --- Challenge display --- */
-function updateChallengeVis(){
-  exprEl.textContent = currentChallenge.expr;
-  assignEl.textContent = 'Given: ' + Object.entries(currentChallenge.assign).map(([k,v])=>`${k}=${v?'True':'False'}`).join(', ');
-  resultEl.textContent = '';
-  exprEl.style.transform = 'translateY(-6px)';
-  setTimeout(()=> exprEl.style.transform = '', 120);
-}
-
-/* --- Buff activation --- */
-function activateBuff(p, idx){
-  p.buffUsed[idx] = true;
-  const key = p.buffKeys[idx];
-  switch(key){
-    case 'negate': p.negateNext = true; setResult(`${p.name} used 🔄 Negation — next answer will flip`); log(`${p.name} activated Negation`); beep(780,90,0.06); break;
-    case 'dash': setResult(`${p.name} used ⚡ Dash — skipping turn`); log(`${p.name} activated Dash`); beep(420,80,0.06); renderActive(); setTimeout(()=> nextTurn(true), 400); return;
-    case 'double': p.doubleNext = true; setResult(`${p.name} used 💎 Double — next correct +2`); log(`${p.name} activated Double`); beep(980,110,0.06); break;
-    case 'shield': p.shield = true; setResult(`${p.name} used 🛡️ Shield — next wrong protected`); log(`${p.name} activated Shield`); beep(640,90,0.06); break;
-  }
-  renderActive();
-}
-
-/* --- Answer checking --- */
-function checkAnswer(ans){
-  if (!currentChallenge || gameOver) return;
-  stopTimer();
-  const p = players[currentPlayer];
-  if (p.negateNext){ ans = !ans; p.negateNext = false; setResult(`${p.name} used Negation — answer flipped`); log(`${p.name} negated their answer`); }
-  const correct = !!currentChallenge.eval(currentChallenge.assign);
-  if (ans === correct){
-    let gain = 1;
-    if (p.doubleNext){ gain = 2; p.doubleNext = false; setResult(`${p.name} Correct! +${gain} Gems`, 'ok'); log(`${p.name} correct +${gain}`); }
-    else setResult(`${p.name} Correct! +1 Gem`, 'ok');
-    const old = p.gems;
-    p.gems = Math.min(targetGems, p.gems + gain);
-    p.score++;
-    animateGems(old, p.gems);
-    beep(880,120,0.08);
-  } else {
-    if (p.shield){ setResult(`${p.name} Wrong — Shield protected you`); p.shield = false; log(`${p.name} saved by Shield`); beep(200,90,0.05); }
-    else { setResult(`${p.name} Wrong!`, 'bad'); log(`${p.name} answered wrongly`); beep(240,160,0.08); }
-  }
-  renderActive();
-  if (p.gems >= targetGems){ onWin(p); return; }
-  setTimeout(()=> nextTurn(false), 800);
-}
-
-/* animate gem fill */
-function animateGems(oldCount, newCount){
-  const nodes = gemsArea.children;
-  for (let i=0;i<nodes.length;i++){
-    if (i < newCount) nodes[i].classList.add('fill'); else nodes[i].classList.remove('fill');
-    if (i >= oldCount && i < newCount){ nodes[i].style.transform='scale(1.4)'; setTimeout(()=> nodes[i].style.transform='',240); }
-  }
-}
-
-/* --- Turn progress --- */
-function nextTurn(skipped=false){
-  if (gameOver) return;
-  currentPlayer = (currentPlayer + 1) % players.length;
-  drawQuestion();
-  updateChallengeVis();
-  renderActive();
-  stopTimer(); startTimer();
-  maybeAiAct();
-}
-
-/* --- AI simple --- */
-function maybeAiAct(){
-  const p = players[currentPlayer];
-  if (!p || !p.ai || gameOver) return;
-  const evalCorrect = !!currentChallenge.eval(currentChallenge.assign);
-  const will = Math.random() < (p.aiSkill || 0.7);
-  const chosen = will ? evalCorrect : !evalCorrect;
-  setTimeout(()=> { if (!gameOver && players[currentPlayer] === p) checkAnswer(chosen); }, 700 + Math.random()*900);
-}
-
-/* --- Win / confetti / leaderboard --- */
-function spawnConfetti(count=130){
-  const colors=['#ffd166','#ff3d84','#6c58ff','#36d399','#fff4b8'];
-  for (let i=0;i<count;i++){
-    const el = document.createElement('div');
-    el.style.position='absolute'; el.style.left=(Math.random()*100)+'%'; el.style.top='-10%';
-    el.style.width=(6+Math.random()*12)+'px'; el.style.height=(8+Math.random()*18)+'px';
-    el.style.background = colors[rand(colors.length)]; el.style.opacity='0.95'; el.style.borderRadius='2px';
-    el.style.transform = `rotate(${Math.random()*360}deg)`; const dur = 1200 + Math.random()*2000;
-    el.style.transition = `top ${dur}ms linear, left ${dur}ms linear, transform ${dur}ms linear, opacity ${dur}ms linear`;
-    confettiRoot.appendChild(el);
-    setTimeout(()=> { el.style.top = (80 + Math.random()*20) + '%'; el.style.left = (Math.random()*100)+'%'; el.style.transform = `rotate(${400 + Math.random()*720}deg)`; el.style.opacity='0.9'; }, 20);
-    setTimeout(()=> el.remove(), dur + 300);
-  }
-}
-function onWin(player){
-  gameOver = true;
-  setResult(`🏆 ${player.name} wins with ${player.gems} Gems!`, 'ok');
-  log(`${player.name} won the game!`);
-  playVictoryMelody();
-  spawnConfetti(200);
-  victoryText.textContent = `🎉 ${player.name} is the Champion! 🎉`;
-  victoryBanner.style.display = 'flex';
-  saveWinner(player.name);
-  disableControls(true);
-}
-function saveWinner(name){
-  const key='logicQuest.leaderboard.v1';
-  const board = JSON.parse(localStorage.getItem(key) || '[]');
-  board.unshift({name, date: new Date().toISOString()});
-  localStorage.setItem(key, JSON.stringify(board.slice(0,20)));
-}
-function showLeaders(){
-  const key='logicQuest.leaderboard.v1';
-  const board = JSON.parse(localStorage.getItem(key) || '[]');
-  alert(board.length ? board.map(r=> `${r.name} — ${new Date(r.date).toLocaleString()}`).join('\n') : 'No winners yet');
-}
-
-/* --- Controls --- */
-function disableControls(d){
-  trueBtn.disabled = d;
-  falseBtn.disabled = d;
-  hintBtn.disabled = d;
-  skipBtn.disabled = d;
-  explainBtn.disabled = d;
-}
-
-/* --- Start flow: collect setup and start game --- */
-function initDeck(){ deck = shuffle([...originalDeck]); deckIndex = 0; }
-function drawQuestion(){ if (deckIndex >= deck.length) initDeck(); const q = deck[deckIndex++]; const assign = {}; q.vars.forEach(k=> assign[k] = Math.random() < 0.5); currentChallenge = {...q, assign}; }
-
-function collectSetupAndStart(isDemo=false){
-  turnSeconds = clamp(Number(turnTimeInput.value || 20), 5, 60);
-  targetGems = clamp(Number(targetGemsInput.value || 5), 1, 9);
-  players = [];
-  if (isDemo){
-    players.push({name:'Alice', avatar:'🦊', buffKeys:['double','shield'], buffUsed:[false,false], gems:0, score:0, ai:false});
-    players.push({name:'Bot', avatar:'🐉', buffKeys:['negate','dash'], buffUsed:[false,false], gems:0, score:0, ai:true, aiSkill:0.7});
-  } else {
-    const rows = playersSetup.querySelectorAll('.player-setup');
-    if (!rows.length) buildPlayersSetup();
-    const selectedAvatar = avatarsRow.querySelector('.avatar.selected');
-    const defaultAvatar = selectedAvatar ? selectedAvatar.textContent : AVATARS[0];
-    const actualRows = playersSetup.querySelectorAll('.player-setup');
-    actualRows.forEach((r,i) => {
-      const name = r.querySelector('input[type="text"]').value || `Player ${i+1}`;
-      const selects = r.querySelectorAll('select');
-      const buff1 = selects[0].value; const buff2 = selects[1].value;
-      players.push({name, avatar: defaultAvatar, buffKeys:[buff1,buff2], buffUsed:[false,false], gems:0, score:0, ai:false});
-    });
-    if (players.length === 0){
-      const count = clamp(Number(playerCountInput.value||2),1,4);
-      for (let i=0;i<count;i++){
-        players.push({name:`Player ${i+1}`, avatar:AVATARS[i%AVATARS.length], buffKeys:[BUFFS[i%BUFFS.length].key, BUFFS[(i+1)%BUFFS.length].key], buffUsed:[false,false], gems:0, score:0, ai:false});
-      }
+const utils = {
+    clamp: (v, a, b) => Math.max(a, Math.min(b, v)),
+    rand: n => Math.floor(Math.random() * n),
+    shuffle: (a) => {
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    },
+    log: (msg) => {
+        const time = (new Date()).toLocaleTimeString();
+        DOM.logEl.insertAdjacentHTML('afterbegin', `<div class="mb-1"><strong style="color:var(--muted)">[${time}]</strong> ${msg}</div>`);
+    },
+    setResult: (text, tone) => {
+        DOM.resultEl.textContent = text || '';
+        DOM.resultEl.style.color = tone === 'ok' ? 'var(--ok)' : tone === 'bad' ? 'var(--bad)' : 'var(--muted)';
+    },
+    ensureAudio: () => {
+        if (!STATE.audioCtx) {
+            STATE.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    },
+    beep: (freq = 440, dur = 120, vol = 0.06) => {
+        if (STATE.muted) return;
+        try {
+            utils.ensureAudio();
+            if (STATE.audioCtx.state === 'suspended') return;
+            const o = STATE.audioCtx.createOscillator(), g = STATE.audioCtx.createGain();
+            o.type = 'sine'; o.frequency.value = freq; g.gain.value = vol;
+            o.connect(g); g.connect(STATE.audioCtx.destination);
+            o.start(); setTimeout(() => o.stop(), dur);
+        } catch (e) { console.error("Audio error:", e); }
     }
-  }
+};
 
-  // hide overlay and enable game
-  overlay.classList.add('hidden');
-  overlay.style.display = 'none';
-  overlay.setAttribute('aria-hidden','true');
-  gameCard.setAttribute('aria-hidden','false');
-  disableControls(false);
-
-  initDeck();
-  drawQuestion();
-  updateChallengeVis();
-  currentPlayer = 0;
-  renderActive();
-  stopTimer(); startTimer();
-  maybeAiAct();
-  gameOver = false;
-  log('Game started');
+/* --- Setup and UI Generation --- */
+function buildAvatars() {
+    DOM.avatarsRow.innerHTML = '';
+    CONFIG.AVATARS.forEach(av => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'avatar'; b.textContent = av;
+        b.addEventListener('click', () => {
+            DOM.avatarsRow.querySelectorAll('.avatar').forEach(x => x.classList.remove('selected'));
+            b.classList.add('selected');
+        });
+        DOM.avatarsRow.appendChild(b);
+    });
+    // Select the first avatar by default if none is selected
+    if (!DOM.avatarsRow.querySelector('.avatar.selected')) {
+        DOM.avatarsRow.querySelector('.avatar')?.classList.add('selected');
+    }
 }
 
-/* --- Back button: show welcome again and pause/stop timer --- */
-function backToWelcomeHandler(){
-  // Pause game
-  stopTimer();
-  // Show overlay
-  overlay.classList.remove('hidden');
-  overlay.style.display = 'flex';
-  overlay.setAttribute('aria-hidden','false');
-  gameCard.setAttribute('aria-hidden','true');
-  // Keep game state in memory; user can resume by starting again (or you can re-add resume logic)
-  disableControls(true);
-  log('Returned to welcome screen (game paused).');
+function buildPlayersSetup() {
+    DOM.playersSetup.innerHTML = '';
+    const count = utils.clamp(Number(DOM.playerCountInput.value || 2), 1, 4);
+    for (let i = 0; i < count; i++) {
+        const row = document.createElement('div');
+        row.className = 'player-setup d-flex gap-2 align-items-center flex-wrap';
+        
+        const name = document.createElement('input');
+        name.type = 'text'; name.value = `Player ${i + 1}`; name.placeholder = `Player ${i + 1}`; name.classList.add('flex-grow-1');
+        
+        const buff1 = document.createElement('select'); const buff2 = document.createElement('select');
+        CONFIG.BUFFS.forEach(b => {
+            const o1 = document.createElement('option'); o1.value = b.key; o1.textContent = b.name; buff1.appendChild(o1);
+            const o2 = document.createElement('option'); o2.value = b.key; o2.textContent = b.name; buff2.appendChild(o2);
+        });
+        
+        buff1.style.width = '120px'; buff2.style.width = '120px';
+        row.appendChild(name); row.appendChild(buff1); row.appendChild(buff2);
+        DOM.playersSetup.appendChild(row);
+    }
 }
 
-/* --- Event wiring --- */
-buildAvatars(); buildPlayersSetup();
+/* --- Game Mechanics --- (Full functions kept for completeness) */
+function initDeck() {
+    STATE.deck = utils.shuffle([...CONFIG.DECK]);
+    STATE.deckIndex = 0;
+}
 
-startBtn.addEventListener('click', ()=> collectSetupAndStart(false));
-demoBtn.addEventListener('click', ()=> collectSetupAndStart(true));
-playerCountInput.addEventListener('input', buildPlayersSetup);
+function drawQuestion() {
+    if (STATE.deckIndex >= STATE.deck.length) initDeck();
+    const q = STATE.deck[STATE.deckIndex++];
+    const assign = {};
+    q.vars.forEach(k => assign[k] = Math.random() < 0.5);
+    STATE.currentChallenge = { ...q, assign };
+}
 
-trueBtn.addEventListener('click', ()=> checkAnswer(true));
-falseBtn.addEventListener('click', ()=> checkAnswer(false));
-hintBtn.addEventListener('click', showHint);
-explainBtn.addEventListener('click', explain);
-skipBtn.addEventListener('click', ()=> { log(`${players[currentPlayer].name} skipped.`); setResult('Skipped'); nextTurn(true); });
+function startTimer() {
+    stopTimer();
+    STATE.timerRemaining = STATE.turnSeconds;
+    updateTimer();
+    STATE.timerTicker = setInterval(() => {
+        STATE.timerRemaining--;
+        updateTimer();
+        if (STATE.timerRemaining <= 0) {
+            stopTimer();
+            utils.log(`${STATE.players[STATE.currentPlayerIndex].name} timed out.`);
+            utils.setResult('Time up — auto-skip!', 'bad');
+            setTimeout(() => nextTurn(true), 400);
+        }
+    }, 1000);
+}
 
-backToWelcome.addEventListener('click', backToWelcomeHandler);
+function stopTimer() {
+    if (STATE.timerTicker) {
+        clearInterval(STATE.timerTicker);
+        STATE.timerTicker = null;
+    }
+}
 
-closeVictory.addEventListener('click', ()=> { victoryBanner.style.display='none'; });
+function updateTimer() {
+    DOM.timerInner.textContent = STATE.timerRemaining;
+    const pct = (STATE.timerRemaining / STATE.turnSeconds) * 360;
+    DOM.timerCircle.style.background = `conic-gradient(var(--accent2) ${pct}deg, rgba(255,255,255,.04) ${pct}deg)`;
+}
 
-document.addEventListener('keydown', (e)=>{
-  if (overlay.style.display !== 'none' && !overlay.classList.contains('hidden')){
-    if (e.key === 'Enter'){ e.preventDefault(); startBtn.click(); }
-    return;
-  }
-  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT')) return;
-  const k = e.key.toLowerCase();
-  if (k === 't') trueBtn.click();
-  if (k === 'f') falseBtn.click();
-  if (k === 'h') hintBtn.click();
-  if (k === 's') skipBtn.click();
-  if (k === 'm'){ muted = !muted; localStorage.setItem('logicQuest.muted', muted ? 'true' : 'false'); log(muted ? 'Muted' : 'Unmuted'); }
-});
+function renderActivePlayer() {
+    const p = STATE.players[STATE.currentPlayerIndex];
+    if (!p) return;
 
-function showHint(){ if (!currentChallenge) return; const e=currentChallenge.expr; let tip='Substitute and simplify.'; if (e.includes('⇔')) tip='Biconditional: true when both sides match.'; else if (e.includes('⇒')) tip='Implication: false only if left true and right false.'; else if (e.includes('⊕')) tip='Exclusive OR: true when exactly one true.'; setResult('💡 '+tip); log('Hint: '+tip); }
+    DOM.playerNameEl.textContent = `${p.avatar || ''} ${p.name}`;
+    DOM.scoreArea.textContent = `Score: ${p.score}`;
+    
+    // Render Buffs
+    DOM.buffsArea.innerHTML = '';
+    p.buffKeys.forEach((bk, idx) => {
+        const buff = CONFIG.BUFFS.find(b => b.key === bk);
+        if (!buff) return;
+        
+        const pill = document.createElement('div');
+        pill.className = 'buff-pill' + (p.buffUsed[idx] ? ' used' : '');
+        pill.textContent = buff.name + (p.buffUsed[idx] ? ' (used)' : '');
+        pill.title = buff.desc;
+        
+        pill.addEventListener('click', () => {
+            if (STATE.gameOver) return;
+            if (!p.buffUsed[idx] && STATE.players[STATE.currentPlayerIndex] === p) {
+                activateBuff(p, idx);
+            }
+        });
+        DOM.buffsArea.appendChild(pill);
+    });
 
-function setResult(text, tone){ resultEl.textContent=text || ''; resultEl.style.color = tone==='ok' ? 'var(--ok)' : tone==='bad' ? 'var(--bad)' : 'var(--muted)'; }
+    // Render Gems
+    DOM.gemsArea.innerHTML = '';
+    for (let i = 0; i < STATE.targetGems; i++) {
+        const g = document.createElement('div');
+        g.className = 'gem' + (i < p.gems ? ' fill' : '');
+        DOM.gemsArea.appendChild(g);
+    }
 
-startBtn.focus();
+    renderIndicators();
+}
 
-/* Unlock audio on first gesture (policy) */
-document.addEventListener('click', function unlock(){
-  try{ ensureAudio(); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }catch(e){} document.removeEventListener('click', unlock);
-});
+function renderIndicators() {
+    DOM.indicators.innerHTML = '';
+    STATE.players.forEach((pl, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === STATE.currentPlayerIndex ? ' active' : '');
+        dot.title = pl.name;
+        dot.addEventListener('click', () => {
+            STATE.currentPlayerIndex = i;
+            renderActivePlayer();
+            if (STATE.currentChallenge) updateChallengeVis();
+        });
+        DOM.indicators.appendChild(dot);
+    });
+}
 
-/* expose debug */
-window._logicQuest = { players, collectSetupAndStart, spawnConfetti };
+function updateChallengeVis() {
+    const challenge = STATE.currentChallenge;
+    if (!challenge) return;
+    
+    DOM.exprEl.textContent = challenge.expr;
+    DOM.assignEl.textContent = 'Given: ' + Object.entries(challenge.assign).map(([k, v]) => `${k}=${v ? 'True' : 'False'}`).join(', ');
+    utils.setResult('');
+    
+    DOM.exprEl.style.transform = 'translateY(-6px)';
+    setTimeout(() => DOM.exprEl.style.transform = '', 120);
+}
 
-/* small helpers used above */
-function buildPlayersSetup(){ playersSetup.innerHTML=''; const count = clamp(Number(playerCountInput.value || 2),1,4); for(let i=0;i<count;i++){ const row=document.createElement('div'); row.className='player-setup'; row.style.display='flex'; row.style.gap='8px'; row.style.alignItems='center'; const name=document.createElement('input'); name.type='text'; name.value=`Player ${i+1}`; name.placeholder=`Player ${i+1}`; name.style.flex='1'; const buff1=document.createElement('select'); const buff2=document.createElement('select'); BUFFS.forEach(b => { const o1=document.createElement('option'); o1.value=b.key; o1.textContent=b.name; buff1.appendChild(o1); const o2=document.createElement('option'); o2.value=b.key; o2.textContent=b.name; buff2.appendChild(o2); }); buff1.style.width='120px'; buff2.style.width='120px'; row.appendChild(name); row.appendChild(buff1); row.appendChild(buff2); playersSetup.appendChild(row);} }
+function activateBuff(p, idx) {
+    p.buffUsed[idx] = true;
+    const key = p.buffKeys[idx];
+    
+    switch (key) {
+        case 'negate': p.negateNext = true; utils.setResult(`${p.name} used 🔄 Negation — next answer will flip`); utils.log(`${p.name} activated Negation`); utils.beep(780, 90, 0.06); break;
+        case 'dash': utils.setResult(`${p.name} used ⚡ Dash — skipping turn`); utils.log(`${p.name} activated Dash`); utils.beep(420, 80, 0.06); renderActivePlayer(); setTimeout(() => nextTurn(true), 400); return;
+        case 'double': p.doubleNext = true; utils.setResult(`${p.name} used 💎 Double — next correct +2`); utils.log(`${p.name} activated Double`); utils.beep(980, 110, 0.06); break;
+        case 'shield': p.shield = true; utils.setResult(`${p.name} used 🛡️ Shield — next wrong protected`); utils.log(`${p.name} activated Shield`); utils.beep(640, 90, 0.06); break;
+    }
+    renderActivePlayer();
+}
 
+function checkAnswer(ans) {
+    if (!STATE.currentChallenge || STATE.gameOver) return;
+    stopTimer();
+    
+    const p = STATE.players[STATE.currentPlayerIndex];
+    let finalAns = ans;
+
+    if (p.negateNext) { finalAns = !ans; p.negateNext = false; utils.setResult(`${p.name} used Negation — answer flipped`); utils.log(`${p.name} negated their answer`); }
+    
+    const correct = !!STATE.currentChallenge.eval(STATE.currentChallenge.assign);
+    
+    if (finalAns === correct) {
+        let gain = 1;
+        let message = `${p.name} Correct! +1 Gem`;
+        if (p.doubleNext) { gain = 2; p.doubleNext = false; message = `${p.name} Correct! +${gain} Gems (Double)`; }
+        
+        utils.setResult(message, 'ok');
+        utils.log(`${p.name} correct +${gain}`);
+        const oldGems = p.gems;
+        p.gems = Math.min(STATE.targetGems, p.gems + gain);
+        p.score++;
+        animateGems(oldGems, p.gems);
+        utils.beep(880, 120, 0.08);
+
+    } else {
+        if (p.shield) { utils.setResult(`${p.name} Wrong — Shield protected you`, 'bad'); p.shield = false; utils.log(`${p.name} saved by Shield`); utils.beep(200, 90, 0.05); } 
+        else {
+            const oldGems = p.gems;
+            p.gems = Math.max(0, p.gems - 1);
+            utils.setResult(`${p.name} Wrong! -1 Gem!`, 'bad');
+            utils.log(`${p.name} answered wrongly, lost 1 gem`);
+            animateGems(oldGems, p.gems); 
+            utils.beep(240, 160, 0.08);
+        }
+    }
+
+    renderActivePlayer();
+    if (p.gems >= STATE.targetGems) {
+        onWin(p);
+        return;
+    }
+    setTimeout(() => nextTurn(false), 800);
+}
+
+function animateGems(oldCount, newCount) {
+    const nodes = DOM.gemsArea.children;
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const isFill = i < newCount;
+        node.classList.toggle('fill', isFill);
+        
+        if (i >= oldCount && i < newCount) {
+            node.style.transform = 'scale(1.4)';
+            setTimeout(() => node.style.transform = '', 240);
+        } 
+        else if (i < oldCount && i >= newCount) {
+            node.style.transform = 'scale(0.8)';
+            setTimeout(() => node.style.transform = '', 240);
+        }
+    }
+}
+
+function nextTurn(skipped = false) {
+    if (STATE.gameOver) return;
+    
+    STATE.currentPlayerIndex = (STATE.currentPlayerIndex + 1) % STATE.players.length;
+    drawQuestion();
+    updateChallengeVis();
+    renderActivePlayer();
+    
+    stopTimer(); 
+    startTimer();
+    maybeAiAct();
+}
+
+function maybeAiAct() {
+    const p = STATE.players[STATE.currentPlayerIndex];
+    if (!p || !p.ai || STATE.gameOver) return;
+    
+    const evalCorrect = !!STATE.currentChallenge.eval(STATE.currentChallenge.assign);
+    const willBeCorrect = Math.random() < (p.aiSkill || 0.7);
+    const chosenAnswer = willBeCorrect ? evalCorrect : !evalCorrect;
+    
+    setTimeout(() => { 
+        if (!STATE.gameOver && STATE.players[STATE.currentPlayerIndex] === p) {
+            checkAnswer(chosenAnswer); 
+        }
+    }, 700 + Math.random() * 900);
+}
+
+/* --- Win / End Game --- */
+function spawnConfetti(count = 130) {
+    const colors = ['#ffd166', '#ff3d84', '#6c58ff', '#36d399', '#fff4b8'];
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.style.cssText = `
+            position:absolute; left:${(Math.random() * 100)}%; top:-10%;
+            width:${(6 + Math.random() * 12)}px; height:${(8 + Math.random() * 18)}px;
+            background:${colors[utils.rand(colors.length)]}; opacity:0.95; border-radius:2px;
+            transform:rotate(${Math.random() * 360}deg);
+        `;
+        const dur = 1200 + Math.random() * 2000;
+        el.style.transition = `top ${dur}ms linear, left ${dur}ms linear, transform ${dur}ms linear, opacity ${dur}ms linear`;
+        DOM.confettiRoot.appendChild(el);
+        
+        setTimeout(() => {
+            el.style.top = (80 + Math.random() * 20) + '%';
+            el.style.left = (Math.random() * 100) + '%';
+            el.style.transform = `rotate(${400 + Math.random() * 720}deg)`;
+            el.style.opacity = '0.9';
+        }, 20);
+        setTimeout(() => el.remove(), dur + 300);
+    }
+}
+
+function onWin(player) {
+    STATE.gameOver = true;
+    stopTimer();
+    utils.setResult(`🏆 ${player.name} wins with ${player.gems} Gems!`, 'ok');
+    utils.log(`${player.name} won the game!`);
+    
+    utils.beep(523, 150, 0.08); 
+    setTimeout(() => utils.beep(659, 150, 0.08), 150); 
+    setTimeout(() => utils.beep(784, 300, 0.08), 300);
+    
+    spawnConfetti(200);
+    DOM.victoryText.textContent = `🎉 ${player.name} is the Champion! 🎉`;
+    DOM.victoryBanner.style.display = 'flex';
+    saveWinner(player.name);
+    disableControls(true);
+}
+
+function saveWinner(name) {
+    const key = 'logicQuest.leaderboard.v1';
+    const board = JSON.parse(localStorage.getItem(key) || '[]');
+    board.unshift({ name, date: new Date().toISOString() });
+    localStorage.setItem(key, JSON.stringify(board.slice(0, 20)));
+}
+
+function disableControls(d) {
+    DOM.trueBtn.disabled = d;
+    DOM.falseBtn.disabled = d;
+    DOM.hintBtn.disabled = d;
+    DOM.skipBtn.disabled = d;
+    DOM.explainBtn.disabled = d;
+}
+
+/* --- Start Flow --- */
+function collectSetupAndStart(isDemo = false) {
+    STATE.turnSeconds = utils.clamp(Number(DOM.turnTimeInput.value || 20), 5, 60);
+    STATE.targetGems = utils.clamp(Number(DOM.targetGemsInput.value || 5), 1, 9);
+    STATE.players = [];
+
+    if (isDemo) {
+        STATE.players.push({name:'Alice', avatar:'🦊', buffKeys:['double','shield'], buffUsed:[false,false], gems:0, score:0, ai:false, negateNext:false, doubleNext:false, shield:false});
+        STATE.players.push({name:'Bot', avatar:'🐉', buffKeys:['negate','dash'], buffUsed:[false,false], gems:0, score:0, ai:true, aiSkill:0.7, negateNext:false, doubleNext:false, shield:false});
+    } else {
+        const selectedAvatar = DOM.avatarsRow.querySelector('.avatar.selected');
+        const defaultAvatar = selectedAvatar ? selectedAvatar.textContent : CONFIG.AVATARS[0];
+        const actualRows = DOM.playersSetup.querySelectorAll('.player-setup');
+        
+        actualRows.forEach((r, i) => {
+            const name = r.querySelector('input[type="text"]').value || `Player ${i + 1}`;
+            const selects = r.querySelectorAll('select');
+            const buff1 = selects[0].value; 
+            const buff2 = selects[1].value;
+            
+            STATE.players.push({
+                name, avatar: defaultAvatar, 
+                buffKeys: [buff1, buff2], buffUsed: [false, false], 
+                gems: 0, score: 0, ai: false, 
+                negateNext: false, doubleNext: false, shield: false
+            });
+        });
+        
+        if (STATE.players.length === 0) {
+            collectSetupAndStart(true);
+            return;
+        }
+    }
+
+    DOM.overlay.classList.add('hidden');
+    DOM.overlay.style.display = 'none';
+    DOM.overlay.setAttribute('aria-hidden', 'true');
+    DOM.gameCard.setAttribute('aria-hidden', 'false');
+
+    disableControls(false);
+    initDeck();
+    drawQuestion();
+    updateChallengeVis();
+    
+    STATE.currentPlayerIndex = 0;
+    STATE.gameOver = false;
+    
+    renderActivePlayer();
+    stopTimer(); 
+    startTimer();
+    maybeAiAct();
+    utils.log('Game started');
+}
+
+function backToWelcomeHandler() {
+    stopTimer();
+    DOM.overlay.classList.remove('hidden');
+    DOM.overlay.style.display = 'flex';
+    DOM.overlay.setAttribute('aria-hidden', 'false');
+    DOM.gameCard.setAttribute('aria-hidden', 'true');
+    disableControls(true);
+    utils.log('Returned to welcome screen (game paused).');
+}
+
+/* --- Control Handlers --- */
+function handleShowHint() {
+    if (!STATE.currentChallenge) return;
+    const e = STATE.currentChallenge.expr;
+    let tip = 'Substitute variable values and simplify.';
+    if (e.includes('⇔')) tip = 'Biconditional: true when both sides match.';
+    else if (e.includes('⇒')) tip = 'Implication: false only if left true and right false.';
+    else if (e.includes('⊕')) tip = 'Exclusive OR: true when exactly one true.';
+    utils.setResult('💡 ' + tip, 'muted'); 
+    utils.log('Hint: ' + tip);
+}
+
+function handleExplain() {
+    if (!STATE.currentChallenge) return;
+    const correct = !!STATE.currentChallenge.eval(STATE.currentChallenge.assign);
+    let explanation = `The expression **${STATE.currentChallenge.expr}** with **${Object.entries(STATE.currentChallenge.assign).map(([k,v])=>`${k}=${v?'True':'False'}`).join(', ')}** evaluates to **${correct ? 'True' : 'False'}**.`;
+    utils.setResult(explanation, 'muted');
+    utils.log('Explanation requested');
+}
+
+function handleSkip() {
+    utils.log(`${STATE.players[STATE.currentPlayerIndex].name} skipped.`); 
+    utils.setResult('Skipped', 'muted'); 
+    nextTurn(true);
+}
+
+function handleKeyPress(e) {
+    if (DOM.overlay.style.display !== 'none' && !DOM.overlay.classList.contains('hidden')) {
+        if (e.key === 'Enter') { e.preventDefault(); DOM.startBtn.click(); }
+        return;
+    }
+    
+    if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT' || document.activeElement.getAttribute('tabindex') === '0')) return;
+
+    const k = e.key.toLowerCase();
+    
+    if (k === 't') DOM.trueBtn.click();
+    else if (k === 'f') DOM.falseBtn.click();
+    else if (k === 'h') DOM.hintBtn.click();
+    else if (k === 's') DOM.skipBtn.click();
+    else if (k === 'm') {
+        STATE.muted = !STATE.muted;
+        localStorage.setItem('logicQuest.muted', STATE.muted ? 'true' : 'false');
+        utils.log(STATE.muted ? 'Muted' : 'Unmuted');
+    }
+}
+
+/* --- Initialization and Event Listeners --- */
+function init() {
+    buildAvatars();
+    buildPlayersSetup();
+
+    DOM.startBtn.addEventListener('click', () => collectSetupAndStart(false));
+    DOM.demoBtn.addEventListener('click', () => collectSetupAndStart(true));
+    DOM.playerCountInput.addEventListener('input', buildPlayersSetup);
+
+    DOM.trueBtn.addEventListener('click', () => checkAnswer(true));
+    DOM.falseBtn.addEventListener('click', () => checkAnswer(false));
+    DOM.hintBtn.addEventListener('click', handleShowHint);
+    DOM.explainBtn.addEventListener('click', handleExplain);
+    DOM.skipBtn.addEventListener('click', handleSkip);
+    
+    DOM.backToWelcome.addEventListener('click', backToWelcomeHandler);
+    DOM.closeVictory.addEventListener('click', () => { DOM.victoryBanner.style.display = 'none'; });
+    document.addEventListener('keydown', handleKeyPress);
+    
+    DOM.startBtn.focus();
+
+    document.addEventListener('click', function unlockAudio() {
+        try {
+            utils.ensureAudio();
+            if (STATE.audioCtx && STATE.audioCtx.state === 'suspended') {
+                STATE.audioCtx.resume().then(() => { utils.log('Audio unlocked'); });
+            }
+        } catch (e) {} 
+        document.removeEventListener('click', unlockAudio);
+    }, { once: true });
+
+    window._logicQuest = { STATE, collectSetupAndStart, spawnConfetti };
+}
+
+init();
 </script>
 </body>
-
 </html>
