@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Logic Quest — Finalized Start & Focused Play</title>
+<title>Logic Quest</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
 <style>
@@ -30,7 +30,7 @@ header h1{margin:0;font-size:20px}
 .muted{color:var(--muted);font-size:14px} 
 
 main{
-  height:calc(100% - 60px); 
+  height:calc(100% - 20px); 
   padding:1rem 0;
 }
 
@@ -38,7 +38,8 @@ main{
 .game-card{
   background:linear-gradient(180deg,#071033,#06102a);
   border-radius:16px; 
-  padding:1.25rem; /* Reduced from 1.5rem */
+  max-width: 700px !important;      /* was 1000px */
+  padding: 0.75rem !important;
   border:1px solid var(--border);
   box-shadow:0 18px 60px rgba(0,0,0,.6);
   overflow:hidden;position:relative;
@@ -46,7 +47,9 @@ main{
 
 /* Player Card */
 .player-card{
-  padding:0.75rem; /* Reduced from 1rem */
+  font-size: 18px !important;
+  max-width: 500px !important;
+  padding: 0.5rem !important;
   border-radius:18px; 
   background:linear-gradient(180deg,#081236,#07102a);
   border:1px solid rgba(255,255,255,.06); 
@@ -199,10 +202,10 @@ input[type=number], input[type=text], select{
     </div>
 
     <div id="result"></div>
-    <div class="indicators d-flex gap-2 mt-3" id="indicators"></div>
-    
-    <div class="log w-100 mt-3 mx-auto" id="log" tabindex="0" style="max-width: 600px;"></div>
-  </div>
+      <div class="indicators d-flex gap-2 mt-3" id="indicators"></div>
+      
+      <div class="log w-100 mt-3 mx-auto" id="log" tabindex="0" style="max-width: 600px;"></div>
+    </div>
 </main>
 
 <div id="victoryBanner" class="victory" style="display:none"><div id="victoryText"></div><button id="closeVictory" class="btn-secondary">Close</button></div>
